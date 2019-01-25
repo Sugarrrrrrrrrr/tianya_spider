@@ -1,0 +1,230 @@
+import config
+from pymongo import MongoClient
+
+
+def gen_reply_start_url(block, pid, comment_get):
+    page = int(comment_get/100) + 1
+    return 'http://bbs.tianya.cn/post-%s-%s-%d.shtml' % (block, pid, page)
+
+
+def gen_user_url(uid):
+    return 'http://www.tianya.cn/%s' % uid
+
+
+class MongoCtl:
+    def __init__(self):
+        self.client = MongoClient(host='localhost', port=27017)
+        self.tianya = self.client.tianya
+
+        # urls queue
+        self.block_urls = self.tianya.block_urls
+        self.post_urls = self.tianya.post_urls
+        self.reply_urls = self.tianya.reply_urls
+        self.user_urls = self.tianya.user_urls
+        self.other_urls = self.tianya.other_urls
+
+        # data
+        self.posts = self.tianya.posts
+        self.replys = self.tianya.replys
+        self.users = self.tianya.users
+
+        # config
+        self.config = self.tianya.config
+
+    def add_new_block_url(self, url):
+        if self.block_urls.find_one({'url': url}):
+            return False
+        else:
+            data = {
+                'url': url,
+                'status': config.STATUS_OUTSTANDING
+            }
+            self.block_urls.update(
+                {'url': url},
+                data,
+                upsert=True
+            )
+            return True
+
+    def add_new_post_url(self, url):
+        if self.post_urls.find_one({'url': url}):
+            return False
+        else:
+            data = {
+                'url': url,
+                'status': config.STATUS_OUTSTANDING
+            }
+            self.post_urls.update(
+                {'url': url},
+                data,
+                upsert=True
+            )
+            return True
+
+    def add_new_other_url(self, url):
+        if self.other_urls.find_one({'url': url}):
+            return False
+        else:
+            data = {
+                'url': url,
+                'status': config.STATUS_OUTSTANDING
+            }
+            self.other_urls.update(
+                {'url': url},
+                data,
+                upsert=True
+            )
+            return True
+
+    def add_new_user_url(self, uid):
+        if self.users.find_one({'uid': uid}):
+            return False
+        else:
+            data = {
+                'uid': uid,
+                'url': gen_user_url(uid),
+                'status': config.STATUS_OUTSTANDING
+            }
+            self.user_urls.update(
+                {'uid': uid},
+                data,
+                upsert=True
+            )
+            return True
+
+    def remove_post_url(self, url):
+        self.post_urls.remove({'url': url})
+
+    def remove_user_url(self, url):
+        self.user_urls.remove({'url': url})
+
+    def add_new_post_and_reply_url(self, data):
+        block = data['block']
+        pid = data['pid']
+        record = self.posts.find_one({
+            'block': block,
+            'pid': pid
+        })
+        if record:
+            comment_get = record['comment_get']
+            data['comment_get'] = comment_get
+        else:
+            comment_get = 0
+            data['comment_get'] = 0
+
+        # add new post
+        self.posts.update(
+            {
+                'block': block,
+                'pid': pid
+            },
+            data,
+            upsert=True
+        )
+        # add new reply url
+        self.reply_urls.update(
+            {
+                'block': block,
+                'pid': pid
+            },
+            {
+                'block': block,
+                'pid': pid,
+                'url': gen_reply_start_url(block, pid, comment_get),
+                'status': config.STATUS_OUTSTANDING
+            },
+            upsert=True
+        )
+
+    def add_new_user(self, data):
+        uid = data['uid']
+        self.users.update(
+            {'uid': uid},
+            {'$set': data},
+            upsert=True
+        )
+
+    def add_new_reply_and_update_comment(self, data):
+        block = data['block']
+        pid = data['pid']
+        rid = data['rid']
+        floor = data['floor']
+        record = self.replys.find_one({
+            'block': block,
+            'pid': pid,
+            'rid': rid
+        })
+        if record:
+            pass
+        else:
+            # add new reply
+            self.replys.update(
+                {
+                    'block': block,
+                    'pid': pid,
+                    'rid': rid
+                },
+                data,
+                upsert=True
+            )
+            # update comment
+            post_record = self.posts.find_one({
+                'block': block,
+                'pid': pid
+            })
+            if post_record:
+                comment_get = post_record['comment_get']
+                if floor > comment_get:
+                    self.posts.update_one(
+                        {
+                            'block': block,
+                            'pid': pid
+                        },
+                        {
+                            '$set': {
+                                'comment_get': floor
+                            }
+                        }
+                    )
+
+    def get_block_urls(self):
+        urls = list()
+        data = self.block_urls.find()
+        for record in data:
+            url = record['url']
+            urls.append(url)
+        return urls
+
+    def get_post_urls(self, n):
+        urls = list()
+        data = self.post_urls.find().limit(n)
+        for record in data:
+            url = record['url']
+            urls.append(url)
+        return urls
+
+    def get_user_urls(self, n):
+        urls = list()
+        data = self.user_urls.find().limit(n)
+        for record in data:
+            url = record['url']
+            urls.append(url)
+        return urls
+
+    def get_reply_urls_and_delete(self, n):
+        urls = list()
+        data = self.reply_urls.find().limit(n)
+        for record in data:
+            url = record['url']
+            temp = self.reply_urls.find_one_and_delete({'url': url})
+            if temp:
+                urls.append(url)
+        return urls
+
+
+if __name__ == '__main__':
+    mongoctl = MongoCtl()
+    url = "http://bbs.tianya.cn/post-free-5922783-1.shtml"
+
+    mongoctl.add_new_post_url(url)
+
