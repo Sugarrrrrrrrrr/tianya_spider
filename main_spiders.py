@@ -7,8 +7,8 @@ from tianya_spider.spiders.userSpider import UserSpider
 
 if __name__ == '__main__':
     process = CrawlerProcess()
-    # process.crawl(ListSpider)
-    # process.crawl(PostSpider)
-    # process.crawl(ReplySpider)
+    process.crawl(ListSpider)
+    process.crawl(PostSpider)
+    process.crawl(ReplySpider)
     process.crawl(UserSpider)
     process.start()

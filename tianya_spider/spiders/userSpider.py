@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy_redis.spiders import RedisSpider
 from tianya_spider.items import UserItem
 from utils import get_user_urls
+from utils import get_time
+import config
 
 
-class UserSpider(scrapy.Spider):
+class UserSpider(RedisSpider):
     name = 'userSpider'
     allowed_domains = ['tianya.cn']
     start_urls = ['http://www.tianya.cn/102020474']
@@ -13,12 +16,22 @@ class UserSpider(scrapy.Spider):
         'CONCURRENT_REQUESTS': 1024,
         'CONCURRENT_REQUESTS_PER_DOMAIN': 512,
         'CONCURRENT_REQUESTS_PER_IP': 256,
+        'DOWNLOAD_TIMEOUT': 30,
+        'LOG_LEVEL': config.LOG_LEVEL,
         'DOWNLOADER_MIDDLEWARES': {
+            'tianya_spider.middlewares.ProcessAllExceptionMiddleware': 120,
             'tianya_spider.middlewares.ProxyMiddleware': 543,
         },
         'ITEM_PIPELINES': {
             'tianya_spider.pipelines.UserSpiderPipeline': 543,
-        }
+            # Store scraped item in redis for post-processing.
+            # 'scrapy_redis.pipelines.RedisPipeline': 300,
+        },
+        # scrapy-redis
+        'SCHEDULER': "scrapy_redis.scheduler.Scheduler",
+        'DUPEFILTER_CLASS': "scrapy_redis.dupefilter.RFPDupeFilter",
+        'REDIS_HOST': config.REDIS_HOST,
+        'REDIS_PORT': config.REDIS_PORT
     }
 
     def __init__(self):
@@ -27,6 +40,10 @@ class UserSpider(scrapy.Spider):
         pass
 
     def parse(self, response):
+        with open('data/user.txt', 'a') as f:
+            line = get_time() + '\t' + response.url + '\n'
+            f.write(line)
+
         try:
             name = response.xpath("//div[@class='left-area']//h2/a[1]/text()").extract_first()
             gender_str = response.xpath("//div[@class='left-area']//h2/a[2]/@class").extract_first()
@@ -108,5 +125,5 @@ class UserSpider(scrapy.Spider):
             yield item
         except Exception as e:
             with open('log/debug_userSpider_exception.txt', 'a') as f:
-                f.write('userSpider' + '\t' + response.url + '\n' + str(e) + '\n')
+                f.write(get_time() + '\t' + 'userSpider' + '\t' + response.url + '\t' + str(e) + '\n')
                 f.flush()

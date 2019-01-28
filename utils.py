@@ -1,4 +1,5 @@
 import re
+import time
 from mongoctl import MongoCtl
 
 re_block_pid = None
@@ -74,8 +75,8 @@ def remove_user_url(url):
     mongoctl.remove_user_url(url)
 
 
-def remove_user_url(url):
-    mongoctl.remove_user_url(url)
+def remove_reply_url(url):
+    mongoctl.remove_reply_url(url)
 
 
 def get_post_urls(n=10000):
@@ -91,12 +92,12 @@ def add_post_and_reply_url(data):
 
 
 def get_reply_urls(n=10000):
-    return mongoctl.get_reply_urls_and_delete(n)
+    return mongoctl.get_reply_urls(n)
     pass
 
 
 def add_reply_and_update_comment(data):
-    mongoctl.add_new_reply_and_update_comment(data)
+    mongoctl.add_new_reply_and_update_reply_get(data)
 
 
 def add_user(data):
@@ -107,8 +108,12 @@ def add_other_url(url):
     mongoctl.add_new_other_url(url)
 
 
-def add_user_url(uid):
-    mongoctl.add_new_user_url(uid)
+def add_user_url(uid, name):
+    mongoctl.add_new_user_url(uid, name)
+
+
+def get_time():
+    return time.asctime()
 
 
 if __name__ == '__main__':

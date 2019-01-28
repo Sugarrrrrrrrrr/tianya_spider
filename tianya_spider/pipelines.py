@@ -24,7 +24,6 @@ class ListSpiderPipeline(object):
     def process_item(self, item, spider):
         # content = item['post_href'] + '\n'
         # self.file.write(content)
-        print(1)
 
         url = "http://bbs.tianya.cn" + item['post_href']
         url_type = check_url_type(url)
@@ -53,7 +52,7 @@ class PostSpiderPipeline(object):
         add_post_and_reply_url(data)
         remove_post_url(data['url'])
 
-        add_user_url(data['uid'])
+        add_user_url(data['uid'], data['name'])
 
         return item
 
@@ -95,7 +94,7 @@ class ReplySpiderPipeline(object):
         data = dict(item)
         add_reply_and_update_comment(data)
 
-        add_user_url(data['uid'])
+        add_user_url(data['uid'], data['name'])
 
         return item
 
