@@ -6,6 +6,8 @@ from utils import get_reply_urls
 from utils import get_user_urls
 import redis
 import config
+from logging_config import setup_logging
+import logging
 
 
 def run_list_spider(r):
@@ -35,6 +37,7 @@ def run_user_spider(r, n):
 def run():
     mongoctl = MongoCtl()
     r = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
+    logger = logging.getLogger('main.scheduler')
 
     while True:
         block_urls_num = mongoctl.block_urls.count()
@@ -52,24 +55,24 @@ def run():
              listSpider_start_urls_num, postSpider_start_urls_num,
              replySpider_start_urls_num, userSpider_start_urls_num)
 
-        print(time.asctime()+ '\t' + 'begin' + '\t' + s)
+        logger.info(time.asctime()+ '\t' + 'begin' + '\t' + s)
 
         if user_urls_num != 0:
             if userSpider_start_urls_num == 0:
-                print(time.asctime() + '\t' + 'run_user_spider')
+                logger.info(time.asctime() + '\t' + 'run_user_spider')
                 run_user_spider(r, 50)
 
         if reply_urls_num != 0:
             if replySpider_start_urls_num == 0:
-                print(time.asctime() + '\t' + 'run_reply_spider')
+                logger.info(time.asctime() + '\t' + 'run_reply_spider')
                 run_reply_spider(r, 1000)
         elif post_urls_num != 0:
             if postSpider_start_urls_num == 0:
-                print(time.asctime() + '\t' + 'run_post_spider')
+                logger.info(time.asctime() + '\t' + 'run_post_spider')
                 run_post_spider(r, 1000)
         else:
             if listSpider_start_urls_num == 0:
-                print(time.asctime() + '\t' + 'run_list_spider')
+                logger.info(time.asctime() + '\t' + 'run_list_spider')
                 run_list_spider(r)
 
         # print(time.asctime() + '\t' + 'sleep')
@@ -77,6 +80,8 @@ def run():
 
 
 if __name__ == '__main__':
+    yaml_path = 'logging_config.yaml'
+    setup_logging(yaml_path)
     run()
 
 

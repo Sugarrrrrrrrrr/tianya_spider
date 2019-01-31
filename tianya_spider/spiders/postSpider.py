@@ -9,6 +9,7 @@ from utils import get_reply_comment_for_post
 from utils import get_post_urls
 from utils import get_time
 import config
+import logging
 
 
 class PostSpider(RedisSpider):
@@ -28,7 +29,8 @@ class PostSpider(RedisSpider):
             # 'scrapy_redis.pipelines.RedisPipeline': 300,
         },
         'DOWNLOADER_MIDDLEWARES': {
-            'tianya_spider.middlewares.ProcessAllExceptionMiddleware': 120,
+            'tianya_spider.middlewares.statusCodeMiddleware': 120,
+            'tianya_spider.middlewares.ProxyMiddleware': 543,
         },
         # scrapy-redis
         'SCHEDULER': "scrapy_redis.scheduler.Scheduler",
@@ -41,12 +43,12 @@ class PostSpider(RedisSpider):
         super(PostSpider, self).__init__()
         # self.start_urls = ['http://bbs.tianya.cn/post-free-6029190-2.shtml']
         self.start_urls = get_post_urls()
+        self.logger_ = logging.getLogger('main.debug_postSpider')
         pass
 
     def parse(self, response):
-        with open('data/post.txt', 'a') as f:
-            line = get_time() + '\t' + response.url + '\n'
-            f.write(line)
+        # line = get_time() + '\t' + response.url
+        # self.logger_.debug(line)
 
         try:
             # bd = response.xpath("//div[@id='bd']").extract_first()
@@ -86,6 +88,5 @@ class PostSpider(RedisSpider):
             item['url'] = url
             yield item
         except Exception as e:
-            with open('log/debug_postSpider_exception.txt', 'a') as f:
-                f.write(get_time() + '\t' + 'postSpider' + '\t' + response.url + '\t' + type(e) + '\t' + str(e) + '\n')
-                f.flush()
+            line = get_time() + '\t' + 'postSpider' + '\t' + response.url + '\t' + type(e) + '\t' + str(e)
+            self.logger_.debug(line)

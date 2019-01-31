@@ -23,7 +23,7 @@ def log():
 
 
 def core():
-    logger = logging.getLogger('main')
+    logger = logging.getLogger('main.debug_listSpider')
 
     logger.debug("this is debug")
     logger.info("this is info")

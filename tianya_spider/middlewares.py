@@ -10,6 +10,7 @@ from utils import remove_reply_url
 from utils import remove_post_url
 from utils import remove_user_url
 from utils import get_time
+import logging
 
 
 class TianyaSpiderSpiderMiddleware(object):
@@ -109,11 +110,18 @@ class TianyaSpiderDownloaderMiddleware(object):
 
 class ProxyMiddleware(object):
     def process_request(self, request, spider):
-        request.meta['proxy'] = 'http://10.168.103.145:3128'
+        if spider.name in ['userSpider']:
+            request.meta['proxy'] = 'http://10.168.103.145:3128'
+        elif spider.name in ['listSpider', 'postSpider', 'replySpider']:
+            request.meta['proxy'] = 'http://10.168.103.145:8888'
 
 
-class ProcessAllExceptionMiddleware(object):
+class statusCodeMiddleware(object):
     ALL_EXCEPTIONS = ()
+
+    def __init__(self):
+        super(statusCodeMiddleware, self).__init__()
+        self.logger_ = logging.getLogger('main.statusCodeMiddleware')
 
     def process_response(self, request, response, spider):
         if response.status in (200, ):
@@ -127,20 +135,17 @@ class ProcessAllExceptionMiddleware(object):
             elif spider.name == 'userSpider':
                 remove_user_url(response.url)
             else:
-                with open('log/debug_ProcessAllExceptionMiddleware_exception.txt', 'a') as f:
-                    f.write(get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + str(response.status) + '\t'
-                            + spider.name + '\t' + response.url + '\n')
-                    f.flush()
+                line = get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + str(response.status) + '\t' \
+                       + spider.name + '\t' + response.url
+                self.logger_.debug(line)
         else:
-            with open('log/debug_ProcessAllExceptionMiddleware_exception.txt', 'a') as f:
-                f.write(get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + str(response.status) + '\t'
-                        + spider.name + '\t' + response.url + '\n')
-                f.flush()
+            line = get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + str(response.status) + '\t' \
+                   + spider.name + '\t' + response.url
+            self.logger_.debug(line)
 
         return response
 
     def process_exception(self, request, exception, spider):
-        with open('log/debug_ProcessAllExceptionMiddleware_exception.txt', 'a') as f:
-            f.write(get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + spider.name + '\t' + str(exception)
-                    + '\t' + request.url + '\n')
-            f.flush()
+        line = get_time() + '\t' + 'ProcessAllExceptionMiddleware' + '\t' + spider.name + '\t' + str(exception) \
+               + '\t' + request.url
+        self.logger_.debug(line)

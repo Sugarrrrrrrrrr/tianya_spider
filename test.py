@@ -7,6 +7,7 @@ from utils import get_reply_urls
 from utils import get_user_urls
 import redis
 import config
+import requests
 
 
 if __name__ == '__main__':
@@ -31,7 +32,21 @@ if __name__ == '__main__':
     print(r.llen('listSpider:start_urls'), r.llen('postSpider:start_urls'),
           r.llen('replySpider:start_urls'), r.llen('userSpider:start_urls'))
 
+    block_urls = {
+        'http://bbs.tianya.cn/list-funinfo-1.shtml',
+        'http://bbs.tianya.cn/list-feeling-1.shtml',
+        'http://bbs.tianya.cn/list-1095-1.shtml',
+        'http://bbs.tianya.cn/list-develop-1.shtml',
+        'http://bbs.tianya.cn/list-worldlook-1.shtml',
+        'http://bbs.tianya.cn/list-free-1.shtml',
+        'http://bbs.tianya.cn/list-no05-1.shtml',
+        'http://bbs.tianya.cn/list-16-1.shtml',
+        'http://bbs.tianya.cn/list-333-1.shtml',
+        'http://bbs.tianya.cn/list-934-1.shtml',
+    }
 
+    for url in block_urls:
+        mongoctl.add_new_block_url(url)
 
 
 

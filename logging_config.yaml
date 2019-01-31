@@ -12,12 +12,55 @@ handlers:
     formatter: onlyMessage
     level   : INFO
     stream  : ext://sys.stdout
-  file:
-    class : logging.FileHandler
-    formatter: simple
+  debug_main_scheduler:
+    class : logging.handlers.RotatingFileHandler
     level: DEBUG
-    filename: log/debug.log
-  analyze:
+    formatter: simple
+    filename: log/debug_main_scheduler.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  debug_listSpider:
+    class : logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: log/debug_listSpider.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  debug_postSpider:
+    class : logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: log/debug_postSpider.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  debug_replySpider:
+    class : logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: log/debug_replySpider.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  debug_userSpider:
+    class : logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: log/debug_userSpider.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  debug_statusCodeMiddleware:
+    class : logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: log/debug_statusCodeMiddleware.log
+    maxBytes: 10485760
+    backupCount: 20
+    encoding: utf8
+  error:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: simple
@@ -29,15 +72,27 @@ loggers:
   main:
     level: DEBUG
     handlers: [console]
-  main.utils:
+  main.scheduler:
     level: DEBUG
-    handlers: [file]
-  main.mongoctl:
+    handlers: [debug_main_scheduler]
+  main.debug_listSpider:
     level: DEBUG
-    handlers: [file]
-  main.analyze:
+    handlers: [debug_listSpider]
+  main.debug_postSpider:
     level: DEBUG
-    handlers: [analyze]
+    handlers: [debug_postSpider]
+  main.debug_replySpider:
+    level: DEBUG
+    handlers: [debug_replySpider]
+  main.debug_userSpider:
+    level: DEBUG
+    handlers: [debug_userSpider]
+  main.statusCodeMiddleware:
+    level: DEBUG
+    handlers: [debug_statusCodeMiddleware]
+  main.error:
+    level: DEBUG
+    handlers: [error]
 root:
   level: WARN
   handlers: []
