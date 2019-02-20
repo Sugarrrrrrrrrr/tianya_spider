@@ -76,7 +76,7 @@ def run():
                 run_list_spider(r)
 
         # print(time.asctime() + '\t' + 'sleep')
-        time.sleep(30)
+        time.sleep(60)
 
 
 if __name__ == '__main__':

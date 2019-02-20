@@ -17,10 +17,11 @@ class ReplySpider(RedisSpider):
     start_urls = ['http://bbs.tianya.cn/post-free-6029190-1.shtml']
 
     custom_settings = {
-        'CONCURRENT_REQUESTS': 128,
-        'CONCURRENT_REQUESTS_PER_DOMAIN': 64,
-        'CONCURRENT_REQUESTS_PER_IP': 32,
+        'CONCURRENT_REQUESTS': 256,
+        'CONCURRENT_REQUESTS_PER_DOMAIN': 128,
+        'CONCURRENT_REQUESTS_PER_IP': 64,
         'DOWNLOAD_TIMEOUT': 30,
+        'REDIRECT_ENABLED': False,
         'DEPTH_LIMIT': config.REPLYSPIDER_DEPTH_LIMIT,
         'LOG_LEVEL': config.LOG_LEVEL,
         'ITEM_PIPELINES': {

@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  tianya_spiders:
+    build: .
+    command: python3 main_spiders.py
+    volumes:
+      - .:/code
+  
+  tianya_scheduler:
+    build: .
+    command: python3 main_scheduler.py
+    volumes:
+      - .:/code    

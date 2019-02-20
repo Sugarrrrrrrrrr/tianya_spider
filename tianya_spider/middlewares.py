@@ -127,7 +127,7 @@ class statusCodeMiddleware(object):
         if response.status in (200, ):
             return response
 
-        if response.status == 404:
+        if response.status in (404, 301):
             if spider.name == 'replySpider':
                 remove_reply_url(response.url)
             elif spider.name == 'postSpider':

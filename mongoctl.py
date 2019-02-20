@@ -14,7 +14,8 @@ def gen_user_url(uid):
 
 class MongoCtl:
     def __init__(self):
-        self.client = MongoClient(host='localhost', port=27017)
+        self.client = MongoClient(host=config.MONGODB_IP, port=config.MONGODB_PORT)
+        self.client.admin.authenticate(config.MONGODB_USER, config.MONGODB_PWD)
         self.tianya = self.client.tianya
 
         # urls queue
@@ -109,7 +110,13 @@ class MongoCtl:
         self.user_urls.remove({'url': url})
 
     def remove_reply_url(self, url):
-        self.reply_urls.remove({'url': url})
+        result = self.reply_urls.remove({'url': url})
+        if result['ok'] == 1:
+            if result['n'] == 1:
+                return True
+            elif result['n'] == 0:
+                return False
+        return False
 
     def add_new_post_and_reply_url(self, data):
         block = data['block']
@@ -246,7 +253,7 @@ if __name__ == '__main__':
     mongoctl = MongoCtl()
     url = "http://bbs.tianya.cn/post-free-5922783-1.shtml"
 
-    data = mongoctl.get_user_urls(2)
-    for record in data:
-        print(record)
+    pass
+
+
 
