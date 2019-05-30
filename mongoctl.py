@@ -1,6 +1,7 @@
 import config
 from pymongo import MongoClient, ASCENDING
 import time
+from dateutil import parser
 
 
 def gen_reply_start_url(block, pid, comment_get):
@@ -15,7 +16,7 @@ def gen_user_url(uid):
 class MongoCtl:
     def __init__(self):
         self.client = MongoClient(host=config.MONGODB_IP, port=config.MONGODB_PORT)
-        self.client.admin.authenticate(config.MONGODB_USER, config.MONGODB_PWD)
+        # self.client.admin.authenticate(config.MONGODB_USER, config.MONGODB_PWD)
         self.tianya = self.client.tianya
 
         # urls queue
@@ -180,6 +181,11 @@ class MongoCtl:
             pass
         else:
             # add new reply
+            try:
+                data['myTime'] = parser.parse(data['time'])
+            except Exception as e:
+                pass
+
             self.replys.update(
                 {
                     'block': block,
@@ -251,8 +257,10 @@ class MongoCtl:
 
 if __name__ == '__main__':
     mongoctl = MongoCtl()
-    url = "http://bbs.tianya.cn/post-free-5922783-1.shtml"
+    # url = "http://bbs.tianya.cn/post-free-5922783-1.shtml"
+    url = "http://bbs.tianya.cn/post-worldlook-1876813-11.shtml"
 
+    print(url)
     pass
 
 
