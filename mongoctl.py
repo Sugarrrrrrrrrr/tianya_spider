@@ -16,7 +16,7 @@ def gen_user_url(uid):
 class MongoCtl:
     def __init__(self):
         self.client = MongoClient(host=config.MONGODB_IP, port=config.MONGODB_PORT)
-        # self.client.admin.authenticate(config.MONGODB_USER, config.MONGODB_PWD)
+        self.client.admin.authenticate(config.MONGODB_USER, config.MONGODB_PWD)
         self.tianya = self.client.tianya
 
         # urls queue
