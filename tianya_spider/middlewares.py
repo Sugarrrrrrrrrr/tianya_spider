@@ -113,7 +113,8 @@ class ProxyMiddleware(object):
         if spider.name in ['userSpider']:
             request.meta['proxy'] = 'http://10.168.103.145:3128'
         elif spider.name in ['listSpider', 'postSpider', 'replySpider']:
-            request.meta['proxy'] = 'http://10.168.103.145:8888'
+            # request.meta['proxy'] = 'http://10.168.103.145:8888'
+            pass
 
 
 class statusCodeMiddleware(object):
