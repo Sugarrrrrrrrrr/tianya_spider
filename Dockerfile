@@ -14,7 +14,7 @@ ENV PYTHONIOENCODING=utf-8
 
 WORKDIR /code
 
-RUN pip3 install pymongo requests pyyaml redis scrapy scrapy-redis -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip3 install pymongo requests pyyaml redis scrapy scrapy-redis python-dateutil -i https://mirrors.aliyun.com/pypi/simple/
 
 CMD ["python3", "main_spiders.py"]
 
